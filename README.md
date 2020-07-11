@@ -1,29 +1,67 @@
-## Gatsby source plugin
+## Description
 This source plugin retrieves podcast data from the [Buzzprout API](https://github.com/Buzzsprout/buzzsprout-api).
 The Buzzsprout api returns the list of [episodes](https://github.com/buzzsprout/buzzsprout-api/blob/master/sections/episodes.md) for a certain podcast identified by its id.
 
-## Usage
-To use this plugin, add it to the `gatsby-config.js` file. It requires some options
+## How to install
 
-```js
-    {
-      resolve: `gatsby-source-buzzsprout-api`
-      options: {
-        name: "SOMENAME",
-        token: BUZZSPROUT_TOKEN,
-        podcastId: "1057351",
-      },
-    },
+```
+npm install --save gatsby-source-buzzsprout-api
+```
+or
+```
+yarn add gatsby-source-buzzsprout-api
 ```
 
+## Available options
 * **name** is a string that will be used to identify the created query. It can be an empty string. This allows you to use the plugin multiple times for different podcasts
 * **token** This is the [authentication token](https://github.com/Buzzsprout/buzzsprout-api#authentication) for the Buzzsprout API
 * **podcastid** This is a number that identifies the podcast
 
+## When do I use this plugin?
+
+If you have a podcast hosted with Buzzsprout you can query the list of episodes and publish them in your site.
+
+## How to use it
+```js
+// In your gatsby-config.js
+module.exports = {
+  plugins: [
+    {
+      resolve: `gatsby-source-buzzsprout-api`,
+      options: {
+        name: `ControlRemoto`,
+        toke: process.env.BUZZSPROUT_TOKEN,
+        podcastId: '1057351' 
+      }
+    }
+  ]
+}
+```
+
+## How to query for data
 After configuration is done two new queries will be available for use
 
-* **allPodcastEpisodeSOMENAME** (where SOMENAME is the `name` option used)
-* **podcastEpisodeSOMENAME**
+Query is `PodcastEpisode${name}`.
+
+When name of options is ControlRemoto, query named as **PodcastEpisodeControlRemoto**
+```graphql
+{
+  allPodcastEpisodeControlRemoto{
+      node {
+        title
+        description
+        audio_url
+      }
+    }
+  
+
+  podcastEpisodeControlRemoto {
+    title
+    description
+    audio_url
+  }
+}
+```
 
 A podcast episode data looks like this
 ```json
@@ -56,6 +94,10 @@ A podcast episode data looks like this
 ```
 
 The `remoteImage` attribute is a `remoteFileNode` created by `gatsby-source-filesystem` to optimize the `artwork_url` is meant to be used with `gatsby-plugin-sharp` and `gatsby-transformer-sharp`
+
+
+## How to contribute
+You can open an issue or add a pull request.
 
 
 ## 🎓 Learning Gatsby
