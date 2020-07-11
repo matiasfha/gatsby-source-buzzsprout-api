@@ -53,7 +53,7 @@ A podcast episode data looks like this
     "private":false,
     "total_plays":150
   },
-
+```
 
 The `remoteImage` attribute is a `remoteFileNode` created by `gatsby-source-filesystem` to optimize the `artwork_url` is meant to be used with `gatsby-plugin-sharp` and `gatsby-transformer-sharp`
 
