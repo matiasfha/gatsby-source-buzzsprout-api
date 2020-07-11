@@ -1,16 +1,30 @@
 {
-  "name": "gatsby-starter-plugin",
+  "name": "gatsby-source-buzzsprout-api",
   "version": "1.0.0",
-  "description": "A minimal boilerplate for the essential files Gatsby looks for in a plugin",
-  "main": "index.js",
+  "description": "A Gatsby source plugin to consume the  Buzzsprout REST API to get podcast episodes data",
+  "main": "gatsby-node.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo \"No build script setup\""
+    "build": "babel src --out-dir .",
+    "prepublish": "npm run build"
   },
   "keywords": [
     "gatsby",
-    "gatsby-plugin"
+    "gatsby-plugin",
+    "gatsby-source-plugin"
   ],
-  "author": "Kyle Gill <kyle.robert.gill@gmail.com>",
-  "license": "0BSD"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matiasfha/gatsby-source-buzzsprout-api.git"
+  },
+  "license": "MIT",
+  "author": "Matias Hernandez aka matiasfha <matiasfh@gmail.com>",
+  "homepage": "https://github.com/matiasfha/gatsby-source-buzzsprout-api",
+  "devDependencies": {
+    "@babel/cli": "7.8.4",
+    "@babel/core": "7.9.0",
+    "@babel/preset-env": "7.9.5"
+  },
+  "dependencies": {
+    "node-fetch": "2.6.0"
+  }
 }
