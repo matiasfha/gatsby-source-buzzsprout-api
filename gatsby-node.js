@@ -7,7 +7,7 @@
  */
 const {
   createFilePath,
-  createRemoteFileNode
+  createRemoteFileNode,
 } = require(`gatsby-source-filesystem`);
 
 const fetch = require("node-fetch");
@@ -16,15 +16,30 @@ const NODE_TYPE = "PodcastEpisode";
 
 exports.onPreInit = () => console.log("Loaded gatsby-starter-plugin");
 
-exports.sourceNodes = async ({
-  actions,
-  createContentDigest,
-  createNodeId
-}, {
-  token,
-  podcastId,
-  name
-}) => {
+const createNodesFromSourceData = ({ sourceData, name, hepers }) => {
+  console.log(`Creating nodes for ${name}`);
+  const { createContentDigest, createNode, createNodeId } = helpers;
+  sourceData.forEach((episode) =>
+    createNode({
+      ...episode,
+      slug: episode.title.split(" ").join("-"),
+      podcastName: name,
+      id: createNodeId(`${NODE_TYPE}-${episode.id}`),
+      // hashes the inputs into an ID
+      parent: null,
+      internal: {
+        type: `${NODE_TYPE}${name}`,
+        content: JSON.stringify(episode),
+        contentDigest: createContentDigest(episode),
+      },
+    })
+  );
+};
+
+exports.sourceNodes = async (
+  { actions, createContentDigest, createNodeId, getNodesByType },
+  { token, podcastId, name }
+) => {
   if (!name) {
     throw new Error("Buzzsprout Source: name is required.");
   }
@@ -37,34 +52,56 @@ exports.sourceNodes = async ({
     throw new Error("Buzzsprout Source: podcastId is required");
   }
 
-  const response = await fetch(`https://www.buzzsprout.com/api/${podcastId}/episodes.json`, {
-    headers: {
-      Authorization: `Token token=${token}`
-    }
-  });
-  const episodes = await response.json(); // loop through data returned from the api and create Gatsby nodes for them
+  const { createNode, touchNode } = actions;
+  const helpers = {
+    ...actions,
+    createContentDigest,
+    createNodeId,
+  };
+  // touch nodes to ensure they aren't garbage collected
+  getNodesByType(`${NODE_TYPE}${name}`).forEach((node) =>
+    touchNode({ nodeId: node.id })
+  );
 
-  episodes.forEach(episode => actions.createNode({ ...episode,
-    slug: episode.title.split(" ").join("-"),
-    podcastName: name,
-    id: createNodeId(`${NODE_TYPE}-${episode.id}`),
-    // hashes the inputs into an ID
-    parent: null,
-    internal: {
-      type: `${NODE_TYPE}${name}`,
-      content: JSON.stringify(episode),
-      contentDigest: createContentDigest(episode)
-    }
-  }));
+  let response;
+  const cacheKey = `Cache-${name}`;
+  let sourceData = await cache.get(cacheKey);
+  if (!sourceData) {
+    console.log("Not using cache, fetching data from api");
+    response = await fetch(
+      `https://www.buzzsprout.com/api/${podcastId}/episodes.json`,
+      {
+        headers: {
+          Authorization: `Token token=${token}`,
+        },
+      }
+    );
+    sourceData = await response.json(); // loop through data returned from the api and create Gatsby nodes for them
+  }
+
+  // Fire interval once a week to get latest data
+  setInterval(() => {
+    createNodesFromSourceData({
+      sourceData,
+      name,
+      helpers,
+    });
+  }, 604800000);
+
+  createNodesFromSourceData({
+    sourceData,
+    name,
+    helpers,
+  });
+
+  return;
 };
 
 exports.onCreateNode = async ({
   node,
-  actions: {
-    createNode
-  },
+  actions: { createNode },
   createNodeId,
-  getCache
+  getCache,
 }) => {
   if (node.podcastName != null) {
     try {
@@ -73,7 +110,7 @@ exports.onCreateNode = async ({
         parentNodeId: node.id,
         createNode,
         createNodeId,
-        getCache
+        getCache,
       });
 
       if (fileNode) {
@@ -84,3 +121,4 @@ exports.onCreateNode = async ({
     }
   }
 };
+
