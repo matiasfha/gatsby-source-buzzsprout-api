@@ -16,7 +16,7 @@ const NODE_TYPE = "PodcastEpisode";
 
 exports.onPreInit = () => console.log("Loaded gatsby-starter-plugin");
 
-const createNodesFromSourceData = ({ sourceData, name, hepers }) => {
+const createNodesFromSourceData = ({ sourceData, name, helpers }) => {
   console.log(`Creating nodes for ${name}`);
   const { createContentDigest, createNode, createNodeId } = helpers;
   sourceData.forEach((episode) =>
@@ -37,7 +37,7 @@ const createNodesFromSourceData = ({ sourceData, name, hepers }) => {
 };
 
 exports.sourceNodes = async (
-  { actions, createContentDigest, createNodeId, getNodesByType },
+  { actions, createContentDigest, createNodeId, getNodesByType, cache },
   { token, podcastId, name }
 ) => {
   if (!name) {
