@@ -30,7 +30,7 @@ module.exports = {
       resolve: `gatsby-source-buzzsprout-api`,
       options: {
         name: `ControlRemoto`,
-        toke: process.env.BUZZSPROUT_TOKEN,
+        token: process.env.BUZZSPROUT_TOKEN,
         podcastId: '1057351' 
       }
     }
